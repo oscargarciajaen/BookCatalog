@@ -17,7 +17,7 @@ class BookControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    void getBookById_ShouldReturnBookAndOkStatus() throws Exception {
+    void getBookById() throws Exception {
         // Petición GET a /books/1 que aún no existe
         mockMvc.perform(get("/books/1")
                         .accept(MediaType.APPLICATION_JSON))
