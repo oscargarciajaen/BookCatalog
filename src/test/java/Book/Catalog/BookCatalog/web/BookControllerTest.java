@@ -20,7 +20,7 @@ class BookControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean // Inyecta un mock de BookService en el contexto de Spring Test
+    @MockitoBean
     private BookService bookService;
 
     @Test
@@ -29,7 +29,7 @@ class BookControllerTest {
         sampleBook.setId(1L);
         given(bookService.findById(1L)).willReturn(sampleBook);
 
-        // 2. Ejecutamos la petición HTTP al controlador
+
         mockMvc.perform(get("/books/1")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
