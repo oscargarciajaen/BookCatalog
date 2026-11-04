@@ -1,18 +1,22 @@
 package Book.Catalog.BookCatalog.web;
 
 import Book.Catalog.BookCatalog.domain.Book;
+import Book.Catalog.BookCatalog.repository.BookRepository;
 import Book.Catalog.BookCatalog.service.BookService;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean; // O org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.RequestEntity.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(BookController.class)
 class BookControllerTest {
@@ -22,6 +26,8 @@ class BookControllerTest {
 
     @MockitoBean
     private BookService bookService;
+    @Mock
+    BookRepository repository;
 
     @Test
     void getBookById_ShouldReturnBookAndOkStatus() throws Exception {
@@ -34,5 +40,22 @@ class BookControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.titulo").value("Game of thrones"));
+    }
+
+    @Test
+    void createBook_ShouldReturnCreatedStatusAndLocationHeader() throws Exception {
+        Book inputBook = new Book("New Book", 300);
+        Book savedBook = new Book("New Book", 300);
+        savedBook.setId(99L);
+
+        given(bookService.save(any(Book.class))).willReturn(savedBook);
+
+        mockMvc.perform(post("/books")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(inputBook)))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "/books/99"))
+                .andExpect(jsonPath("$.id").value(99));
+        }
     }
 }
