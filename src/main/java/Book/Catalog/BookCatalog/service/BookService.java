@@ -21,4 +21,9 @@ public class BookService {
     public Book findById(Long id) {
         return repository.findById(id).orElseThrow(() -> new BookNotFoundException("Libro no encontrado"));
     }
+
+    public Book save(Book book){
+        repository.save(book);
+        return book;
+    }
 }

@@ -3,10 +3,9 @@ package Book.Catalog.BookCatalog.web;
 import Book.Catalog.BookCatalog.domain.Book;
 import Book.Catalog.BookCatalog.service.BookService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
 
 @RestController
 @RequestMapping("/books")
@@ -22,5 +21,11 @@ public class BookController {
     public ResponseEntity<Book> getBookById(@PathVariable Long id) {
         Book book = bookService.findById(id);
         return ResponseEntity.ok(book);
+    }
+
+    @PostMapping
+    public ResponseEntity<Book> createBook(@RequestBody Book book){
+        Book guardado = bookService.save(book);
+        return ResponseEntity.created(URI.create("/books/" + guardado.getId())).body(guardado);
     }
 }
