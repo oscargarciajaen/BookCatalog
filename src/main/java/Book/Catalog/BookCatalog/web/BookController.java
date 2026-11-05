@@ -1,11 +1,14 @@
 package Book.Catalog.BookCatalog.web;
 
 import Book.Catalog.BookCatalog.domain.Book;
+import Book.Catalog.BookCatalog.domain.BookCategory;
+import Book.Catalog.BookCatalog.dto.BookDTO;
 import Book.Catalog.BookCatalog.service.BookService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/books")
@@ -27,5 +30,14 @@ public class BookController {
     public ResponseEntity<Book> createBook(@RequestBody Book book){
         Book guardado = bookService.save(book);
         return ResponseEntity.created(URI.create("/books/" + guardado.getId())).body(guardado);
+    }
+
+    @GetMapping("/category/{category}")
+    public ResponseEntity<List<BookDTO>> listBooksByCategory(
+            @PathVariable BookCategory category) {
+
+        List<BookDTO> lista = bookService.getBookByCategory(category);
+
+        return ResponseEntity.ok(lista);
     }
 }

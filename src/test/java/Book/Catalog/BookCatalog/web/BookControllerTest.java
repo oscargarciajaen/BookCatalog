@@ -1,6 +1,7 @@
 package Book.Catalog.BookCatalog.web;
 
 import Book.Catalog.BookCatalog.domain.Book;
+import Book.Catalog.BookCatalog.domain.BookCategory;
 import Book.Catalog.BookCatalog.dto.BookDTO;
 import Book.Catalog.BookCatalog.service.BookService;
 import org.junit.jupiter.api.Test;
@@ -64,18 +65,26 @@ class BookControllerTest {
     @Test
     void getBookByCategory_ShouldReturnListDtoBooks() throws Exception {
 
-        Book book1 = new Book(1L, "Spring Boot en Acción", CategoriaLibro.TECNOLOGIA);
-        Book book2 = new Book(2L, "Clean Code", CategoriaLibro.TECNOLOGIA);
+        Book book1 = new Book(1L, "Spring Boot en Acción", BookCategory.TECNOLOGIA);
 
-        given(bookService.getBookByCategory(CategoriaLibro.TECNOLOGIA))
-                .willReturn(Arrays.asList(book1, book2));
+        Book book2 = new Book(2L, "Clean Code", BookCategory.TECNOLOGIA);
 
-        mockMvc.perform(get("/api/libros/categoria/TECNOLOGIA")
+        BookDTO dto1 = new BookDTO(book1);
+        BookDTO dto2 = new BookDTO(book2);
+
+        given(bookService.getBookByCategory(BookCategory.TECNOLOGIA))
+                .willReturn(Arrays.asList(dto1, dto2));
+
+        mockMvc.perform(get("/books/category/TECNOLOGIA")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(2)))
-                .andExpect(jsonPath("$[0].titulo").value("Spring Boot en Acción"))
-                .andExpect(jsonPath("$[0].categoria").value("TECNOLOGIA"))
-                .andExpect(jsonPath("$[1].titulo").value("Clean Code"));
+                .andExpect(jsonPath("$",
+                        org.hamcrest.Matchers.hasSize(2)))
+                .andExpect(jsonPath("$[0].titulo")
+                        .value("Spring Boot en Acción"))
+                .andExpect(jsonPath("$[0].categoria")
+                        .value("TECNOLOGIA"))
+                .andExpect(jsonPath("$[1].titulo")
+                        .value("Clean Code"));
     }
 }

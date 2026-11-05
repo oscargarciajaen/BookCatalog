@@ -16,13 +16,30 @@ public class Book {
     @Column(nullable = false, unique = false)
     private Integer numPaginas;
 
+    @Column(nullable = false)
+    private BookCategory categoria;
+
     public Book(String nombre, Integer numPaginas){
         this.titulo = nombre;
         this.numPaginas = numPaginas;
     }
 
+    public Book(Long id, String titulo, BookCategory categoria) {
+        this.id = id;
+        this.titulo = titulo;
+        this.categoria = categoria;
+    }
+
     public Book(){
 
+    }
+
+    public BookCategory getCategory(){
+        return this.categoria;
+    }
+
+    void setCategoria(BookCategory categoria){
+        this.categoria = categoria;
     }
 
     public Long getId() {
