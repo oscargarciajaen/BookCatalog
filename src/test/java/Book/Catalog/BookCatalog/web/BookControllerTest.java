@@ -1,6 +1,7 @@
 package Book.Catalog.BookCatalog.web;
 
 import Book.Catalog.BookCatalog.domain.Book;
+import Book.Catalog.BookCatalog.dto.BookDTO;
 import Book.Catalog.BookCatalog.service.BookService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -55,5 +59,23 @@ class BookControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "/books/99"))
                 .andExpect(jsonPath("$.id").value(99));
+    }
+
+    @Test
+    void getBookByCategory_ShouldReturnListDtoBooks() throws Exception {
+
+        Book book1 = new Book(1L, "Spring Boot en Acción", CategoriaLibro.TECNOLOGIA);
+        Book book2 = new Book(2L, "Clean Code", CategoriaLibro.TECNOLOGIA);
+
+        given(bookService.getBookByCategory(CategoriaLibro.TECNOLOGIA))
+                .willReturn(Arrays.asList(book1, book2));
+
+        mockMvc.perform(get("/api/libros/categoria/TECNOLOGIA")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(2)))
+                .andExpect(jsonPath("$[0].titulo").value("Spring Boot en Acción"))
+                .andExpect(jsonPath("$[0].categoria").value("TECNOLOGIA"))
+                .andExpect(jsonPath("$[1].titulo").value("Clean Code"));
     }
 }
