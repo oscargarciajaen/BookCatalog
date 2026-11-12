@@ -16,6 +16,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -79,7 +80,7 @@ class BookControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$",
-                        org.hamcrest.Matchers.hasSize(2)))
+                        hasSize(2)))
                 .andExpect(jsonPath("$[0].titulo")
                         .value("Spring Boot en Acción"))
                 .andExpect(jsonPath("$[0].categoria")
@@ -92,7 +93,6 @@ class BookControllerTest {
     void getAllBooks_ShouldReturnListDtoBooks() throws Exception {
 
         Book book1 = new Book(1L, "Spring Boot en Acción", BookCategory.TECNOLOGIA);
-
         Book book2 = new Book(2L, "Clean Code", BookCategory.TECNOLOGIA);
 
         BookDTO dto1 = new BookDTO(book1);
@@ -106,11 +106,13 @@ class BookControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$",
                         org.hamcrest.Matchers.hasSize(2)))
-                .andExpect(jsonPath("$[0].titulo")
+                .andExpect(jsonPath("$[0].title")
                         .value("Spring Boot en Acción"))
-                .andExpect(jsonPath("$[0].categoria")
+                .andExpect(jsonPath("$[0].category")
                         .value("TECNOLOGIA"))
-                .andExpect(jsonPath("$[1].titulo")
-                        .value("Clean Code"));
+                .andExpect(jsonPath("$[1].title")
+                        .value("Clean Code"))
+                .andExpect(jsonPath("$[1].category")
+                        .value("TECNOLOGIA"));
     }
 }
