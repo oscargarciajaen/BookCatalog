@@ -67,7 +67,6 @@ class BookControllerTest {
     void getBookByCategory_ShouldReturnListDtoBooks() throws Exception {
 
         Book book1 = new Book(1L, "Spring Boot en Acción", BookCategory.TECNOLOGIA);
-
         Book book2 = new Book(2L, "Clean Code", BookCategory.TECNOLOGIA);
 
         BookDTO dto1 = new BookDTO(book1);
@@ -81,12 +80,14 @@ class BookControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$",
                         hasSize(2)))
-                .andExpect(jsonPath("$[0].titulo")
+                .andExpect(jsonPath("$[0].title")
                         .value("Spring Boot en Acción"))
-                .andExpect(jsonPath("$[0].categoria")
+                .andExpect(jsonPath("$[0].category")
                         .value("TECNOLOGIA"))
-                .andExpect(jsonPath("$[1].titulo")
-                        .value("Clean Code"));
+                .andExpect(jsonPath("$[1].title")
+                        .value("Clean Code"))
+                .andExpect(jsonPath("$[1].category")
+                        .value("TECNOLOGIA"));
     }
 
     @Test
