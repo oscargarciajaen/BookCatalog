@@ -36,4 +36,12 @@ public class BookService {
                 .map(BookDTO::new)
                 .toList();
     }
+
+    public List<BookDTO> getAllBooks() {
+
+        return repository.findAll()
+                .stream()
+                .map(BookDTO::new)
+                .toList();
+    }
 }
