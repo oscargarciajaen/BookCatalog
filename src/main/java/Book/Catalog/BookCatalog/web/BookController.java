@@ -33,11 +33,8 @@ public class BookController {
     }
 
     @GetMapping("/category/{category}")
-    public ResponseEntity<List<BookDTO>> listBooksByCategory(
-            @PathVariable BookCategory category) {
-
+    public ResponseEntity<List<BookDTO>> getBookByCategory(@PathVariable("category") BookCategory category) {
         List<BookDTO> lista = bookService.getBookByCategory(category);
-
         return ResponseEntity.ok(lista);
     }
 
