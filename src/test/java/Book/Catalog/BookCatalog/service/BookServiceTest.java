@@ -35,7 +35,7 @@ class BookServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.of(book));
 
         if (service.findById(1L) != null){
-            Book testBook = service.findById(1L);
+            BookDTO testBook = service.findById(1L);
             assertThat(testBook).isNotNull();
             assertThat(testBook.getTitulo()).isEqualTo("Game of Thrones");
         }

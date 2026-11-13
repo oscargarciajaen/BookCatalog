@@ -39,7 +39,8 @@ class BookControllerTest {
     void getBookById_ShouldReturnBookAndOkStatus() throws Exception {
         Book sampleBook = new Book("Game of thrones", 500);
         sampleBook.setId(1L);
-        given(bookService.findById(1L)).willReturn(sampleBook);
+        BookDTO dtoExample = new BookDTO(sampleBook);
+        given(bookService.findById(1L)).willReturn(dtoExample);
 
         mockMvc.perform(get("/books/1")
                         .accept(MediaType.APPLICATION_JSON))
