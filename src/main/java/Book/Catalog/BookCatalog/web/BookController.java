@@ -21,9 +21,8 @@ public class BookController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Book> getBookById(@PathVariable Long id) {
-        Book book = bookService.findById(id);
-        return ResponseEntity.ok(book);
+    public ResponseEntity<BookDTO> getBookById(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(bookService.findById(id));
     }
 
     @PostMapping

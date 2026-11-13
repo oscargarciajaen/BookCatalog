@@ -8,6 +8,8 @@ import Book.Catalog.BookCatalog.repository.BookRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.OptionalInt;
 
 @Service
 public class BookService {
@@ -18,10 +20,15 @@ public class BookService {
         this.repository = repository;
     }
 
-    public Book findById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() ->
-                        new BookNotFoundException("Libro no encontrado"));
+    public BookDTO findById(Long id) {
+        Optional<Book> bookOptional = repository.findById(id);
+
+        if (bookOptional.isPresent()) {
+            Book book = bookOptional.get();
+            return new BookDTO(book);
+        } else {
+            throw new BookNotFoundException("Libro no encontrado");
+        }
     }
 
     public Book save(Book book) {
