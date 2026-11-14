@@ -14,13 +14,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.Arrays;
-import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(BookController.class)
@@ -116,5 +115,17 @@ class BookControllerTest {
                         .value("Clean Code"))
                 .andExpect(jsonPath("$[1].category")
                         .value("TECNOLOGIA"));
+    }
+
+    @Test
+    void deleteBook_Success() throws Exception {
+        Long bookId = 1L;
+
+        doNothing().when(bookService).deleteBook(bookId);
+
+        mockMvc.perform(delete("/books/{id}", bookId))
+                .andExpect(status().isNoContent());
+
+        verify(bookService, times(1)).deleteBook(bookId);
     }
 }
