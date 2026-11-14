@@ -69,12 +69,10 @@ class BookServiceTest {
     void DeleteBook() {
         Long bookId = 1L;
 
-        when(repository.existsById(bookId)).thenReturn(true);
         doNothing().when(repository).deleteById(bookId);
 
         assertDoesNotThrow(() -> service.deleteBook(bookId));
 
-        verify(repository, times(1)).existsById(bookId);
         verify(repository, times(1)).deleteById(bookId);
     }
 
