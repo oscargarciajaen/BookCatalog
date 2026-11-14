@@ -51,4 +51,8 @@ public class BookService {
                 .map(BookDTO::new)
                 .toList();
     }
+
+    public void deleteBook(Long id){
+        repository.deleteById(id);
+    }
 }
