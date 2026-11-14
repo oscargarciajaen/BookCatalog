@@ -9,15 +9,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import java.sql.Array;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @ExtendWith(MockitoExtension.class)
 class BookServiceTest {
@@ -66,4 +64,18 @@ class BookServiceTest {
                 .usingRecursiveFieldByFieldElementComparator()
                 .isEqualTo(listaEsperada);
     }
+
+    @Test
+    void DeleteBook() {
+        Long bookId = 1L;
+
+        when(repository.existsById(bookId)).thenReturn(true);
+        doNothing().when(repository).deleteById(bookId);
+
+        assertDoesNotThrow(() -> service.deleteBook(bookId));
+
+        verify(repository, times(1)).existsById(bookId);
+        verify(repository, times(1)).deleteById(bookId);
+    }
+
 }
