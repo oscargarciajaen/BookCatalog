@@ -22,6 +22,8 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import Book.Catalog.BookCatalog.domain.exceptions.BookNotFoundException;
+
 @WebMvcTest(BookController.class)
 class BookControllerTest {
 
@@ -128,4 +130,46 @@ class BookControllerTest {
 
         verify(bookService, times(1)).deleteBook(bookId);
     }
+
+
+
+    @Test
+    void getBookById_ShouldReturn404AndErrorJson_WhenBookNotFound() throws Exception {
+        given(bookService.findById(999L))
+                .willThrow(new BookNotFoundException("Libro no encontrado"));
+
+        mockMvc.perform(get("/books/999")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.error").value("NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("Libro no encontrado"))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+
+    @Test
+    void createBook_ShouldReturn400AndErrorJson_WhenJsonMalformed() throws Exception {
+        mockMvc.perform(post("/books")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ json roto"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.error").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").isNotEmpty())
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+
+    @Test
+    void getBookByCategory_ShouldReturn400AndErrorJson_WhenInvalidCategory() throws Exception {
+        mockMvc.perform(get("/books/category/CATEGORIA_INVENTADA")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.error").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").isNotEmpty())
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+
+
+
 }
