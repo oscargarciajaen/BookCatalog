@@ -2,11 +2,12 @@ package Book.Catalog.BookCatalog.web;
 
 import Book.Catalog.BookCatalog.domain.Book;
 import Book.Catalog.BookCatalog.domain.BookCategory;
+import Book.Catalog.BookCatalog.domain.exceptions.BookNotFoundException;
 import Book.Catalog.BookCatalog.dto.BookDTO;
 import Book.Catalog.BookCatalog.service.BookService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.web.server.*;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -15,14 +16,22 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.Arrays;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import Book.Catalog.BookCatalog.domain.exceptions.BookNotFoundException;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(BookController.class)
 class BookControllerTest {
@@ -67,7 +76,6 @@ class BookControllerTest {
 
     @Test
     void getBookByCategory_ShouldReturnListDtoBooks() throws Exception {
-
         Book book1 = new Book(1L, "Spring Boot en Acción", BookCategory.TECNOLOGIA);
         Book book2 = new Book(2L, "Clean Code", BookCategory.TECNOLOGIA);
 
@@ -80,21 +88,15 @@ class BookControllerTest {
         mockMvc.perform(get("/books/category/TECNOLOGIA")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$",
-                        hasSize(2)))
-                .andExpect(jsonPath("$[0].title")
-                        .value("Spring Boot en Acción"))
-                .andExpect(jsonPath("$[0].category")
-                        .value("TECNOLOGIA"))
-                .andExpect(jsonPath("$[1].title")
-                        .value("Clean Code"))
-                .andExpect(jsonPath("$[1].category")
-                        .value("TECNOLOGIA"));
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].title").value("Spring Boot en Acción"))
+                .andExpect(jsonPath("$[0].category").value("TECNOLOGIA"))
+                .andExpect(jsonPath("$[1].title").value("Clean Code"))
+                .andExpect(jsonPath("$[1].category").value("TECNOLOGIA"));
     }
 
     @Test
     void getAllBooks_ShouldReturnListDtoBooks() throws Exception {
-
         Book book1 = new Book(1L, "Spring Boot en Acción", BookCategory.TECNOLOGIA);
         Book book2 = new Book(2L, "Clean Code", BookCategory.TECNOLOGIA);
 
@@ -107,16 +109,11 @@ class BookControllerTest {
         mockMvc.perform(get("/books")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$",
-                        org.hamcrest.Matchers.hasSize(2)))
-                .andExpect(jsonPath("$[0].title")
-                        .value("Spring Boot en Acción"))
-                .andExpect(jsonPath("$[0].category")
-                        .value("TECNOLOGIA"))
-                .andExpect(jsonPath("$[1].title")
-                        .value("Clean Code"))
-                .andExpect(jsonPath("$[1].category")
-                        .value("TECNOLOGIA"));
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].title").value("Spring Boot en Acción"))
+                .andExpect(jsonPath("$[0].category").value("TECNOLOGIA"))
+                .andExpect(jsonPath("$[1].title").value("Clean Code"))
+                .andExpect(jsonPath("$[1].category").value("TECNOLOGIA"));
     }
 
     @Test
@@ -130,8 +127,6 @@ class BookControllerTest {
 
         verify(bookService, times(1)).deleteBook(bookId);
     }
-
-
 
     @Test
     void getBookById_ShouldReturn404AndErrorJson_WhenBookNotFound() throws Exception {
@@ -172,4 +167,48 @@ class BookControllerTest {
 
 
 
+    @Test
+    void methodNotAllowed_ShouldReturn405AndErrorJson() throws Exception {
+        mockMvc.perform(put("/books")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.error").value("METHOD_NOT_ALLOWED"))
+                .andExpect(jsonPath("$.message").isNotEmpty())
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+
+    @Test
+    void unsupportedMediaType_ShouldReturn415AndErrorJson() throws Exception {
+        mockMvc.perform(post("/books")
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .content("texto plano"))
+                .andExpect(status().isUnsupportedMediaType())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.error").value("UNSUPPORTED_MEDIA_TYPE"))
+                .andExpect(jsonPath("$.message").isNotEmpty())
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+
+    @Test
+    void notAcceptable_ShouldReturn406() throws Exception {
+        mockMvc.perform(get("/books")
+                        .accept(MediaType.TEXT_PLAIN))
+                .andExpect(status().isNotAcceptable());
+    }
+
+    @Test
+    void unexpectedException_ShouldReturn500WithoutInternalDetails() throws Exception {
+        given(bookService.getAllBooks())
+                .willThrow(new RuntimeException("SQLSyntaxErrorException: tabla secreta"));
+
+        mockMvc.perform(get("/books")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.error").value("INTERNAL_ERROR"))
+                .andExpect(jsonPath("$.message").value(not(containsString("SQLSyntaxErrorException"))))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
 }
