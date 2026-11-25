@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -126,6 +127,20 @@ class BookControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(bookService, times(1)).deleteBook(bookId);
+    }
+
+    @Test
+    void deleteBook_ShouldReturn404AndErrorJson_WhenBookNotFound() throws Exception {
+        doThrow(new BookNotFoundException("Libro no encontrado"))
+                .when(bookService).deleteBook(999L);
+
+        mockMvc.perform(delete("/books/999")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.error").value("NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("Libro no encontrado"))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
     }
 
     @Test

@@ -17,6 +17,9 @@ import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+import Book.Catalog.BookCatalog.domain.exceptions.BookNotFoundException;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 @ExtendWith(MockitoExtension.class)
 class BookServiceTest {
 
@@ -69,11 +72,23 @@ class BookServiceTest {
     void DeleteBook() {
         Long bookId = 1L;
 
+        when(repository.existsById(bookId)).thenReturn(true);
         doNothing().when(repository).deleteById(bookId);
 
         assertDoesNotThrow(() -> service.deleteBook(bookId));
 
         verify(repository, times(1)).deleteById(bookId);
+    }
+
+    @Test
+    void deleteBook_ShouldThrowBookNotFoundException_WhenIdDoesNotExist() {
+        Long bookId = 999L;
+
+        when(repository.existsById(bookId)).thenReturn(false);
+
+        assertThrows(BookNotFoundException.class, () -> service.deleteBook(bookId));
+
+        verify(repository, never()).deleteById(any());
     }
 
 }
