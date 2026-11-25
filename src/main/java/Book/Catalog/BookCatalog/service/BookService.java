@@ -52,7 +52,10 @@ public class BookService {
                 .toList();
     }
 
-    public void deleteBook(Long id){
+    public void deleteBook(Long id) {
+        if (!repository.existsById(id)) {
+            throw new BookNotFoundException("Libro no encontrado");
+        }
         repository.deleteById(id);
     }
 }
